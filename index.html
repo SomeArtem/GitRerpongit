@@ -1,12 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Hello git</h1>
-    <p>change</p>
-</body>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>particle</title>
+        <style>
+            *{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;    
+            }
+
+            body{
+                overflow: hidden;
+                background: #090531;
+            }
+            canvas{
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="canvas" style="background-color:#0f0c2b;"></canvas>
+        <div style="width: 40; height: 40; background-color: #f8fdc5;">sdv</div>
+        <script>
+            var canvas=document.getElementById('canvas');
+var context=canvas.getContext('2d');
+
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
+
+let particleArray=[];
+
+//отследить мышь
+
+let mouse={
+    x:null,
+    y:null,
+    radius:100
+}
+
+window.addEventListener('mousemove', function(event){
+    mouse.x=event.x;
+    mouse.y=event.y;
+    //mouse.radius=150;
+    //console.log(mouse.x, mouse.y);
+})
+
+context.fillStyle='white'
+context.font='20px Verdana';
+context.fillText('Hello, github',0,40);
+context.strokeStyle='white';
+context.strokeRect(0,0,140,80);
+
+const textCoordinates=context.getImageData(0,0,200,100);
+
+class Particle{
+    constructor(x,y){
+        this.x=x;
+        this.y=y;
+        this.size=3;
+        this.baseX=this.x;
+        this.baseY=this.y;
+        this.density=(Math.random()*30)+1;//частицы будут двигаться быстрее если 1 заменить на большее число        
+    }
+    draw(){
+        context.fillStyle='#353854';
+        context.beginPath();
+        context.arc(this.x, this.y, this.size, 0, Math.PI*2 );
+        context.closePath();
+        context.fill();
+    }
+    update(){
+        let dx=mouse.x-this.x;
+        let dy=mouse.y-this.y;
+        let distance=Math.sqrt(dx*dx+dy*dy);
+        let forceDirectionX=dx/distance;
+        let forceDirectionY=dy/distance;
+        let maxDistance=mouse.radius;
+        let force=(maxDistance-distance)/maxDistance;
+        let DirectionX=forceDirectionX*force*this.density;
+        let DirectionY=forceDirectionY*force*this.density;
+        if(distance<mouse.radius){
+            this.x-=DirectionX;
+            this.y-=DirectionY;
+        } else {
+            if(this.x!==this.baseX){
+                let dx=this.x-this.baseX;
+                this.x-=dx/20;//коэфф определяющий скрость с которой частица возвращается обратно
+            }
+            if(this.y!==this.baseY){
+                let dy=this.y-this.baseY;
+                this.y-=dy/20;//коэфф определяющий скрость с которой частица возвращается обратно
+            }
+        }
+        
+
+    }
+}
+
+function init(){
+    particleArray=[];
+    for (let y=0, y2=textCoordinates.height;y<y2;y++){
+        for (let x=0, x2=textCoordinates.width;x<x2;x++){
+            if (textCoordinates.data[(y*4*textCoordinates.width)+(x*4)+3]>128){
+                let positionX=x;
+                let positionY=y;
+                particleArray.push(new Particle(250+positionX*10, 100+positionY*10  ));
+            }        
+        }
+    }
+
+
+    // for(let i=0;i<500;i++){
+    //     let x=Math.random()*canvas.width;
+    //     let y=Math.random()*canvas.height;
+    //     particleArray.push(new Particle(x,y));
+    // }
+
+
+    // particleArray.push(new Particle(50,50));
+    // particleArray.push(new Particle(80,50));
+}
+init();
+console.log(particleArray)
+
+
+function animate(){
+    context.clearRect(0,0,canvas.width, canvas.height);//очищает контекст перед орисовкой кадра
+    for (let i=0; i<particleArray.length; i++){
+        particleArray[i].draw();
+        particleArray[i].update();
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+
+
+
+
+
+
+
+
+
+
+
+
+
+            
+        </script>
+    </body>
 </html>
